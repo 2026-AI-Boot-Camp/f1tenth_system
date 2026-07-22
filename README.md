@@ -6,13 +6,13 @@ Drivers onboard f1tenth race cars, targeting ROS 2 Humble with the SOSLAB GL-3 L
 
 ```bash
 cd ~/f1tenth_ws/src
-git clone --recurse-submodules https://github.com/PARKasd/f1tenth_system_GL3_LiDAR.git
 cd ~/f1tenth_ws
+git submodule update --init --recursive
 colcon build --symlink-install
 source install/setup.bash
 ```
 
-If the repo was cloned without `--recurse-submodules`, run `git submodule update --init --recursive` inside the repo. Do NOT add `--remote` — it pulls the latest upstream commits instead of the pinned, tested ones.
+
 
 ## GL-3 LiDAR setup
 
