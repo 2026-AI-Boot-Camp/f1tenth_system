@@ -1,7 +1,9 @@
 joy:
   ros__parameters:
-    # device_name: /dev/input/joypad-f710
-    device_id: 0
+    # joy_linux(joy_linux_node)는 SDL을 안 쓰고 /dev/input/js0(joydev)를
+    # 직접 읽는다. jstest가 되는 장치면 바로 잡힌다.
+    # (SDL 기반 joy 패키지는 event* 접근/권한 문제로 /joy가 안 뜰 때가 있음)
+    dev: /dev/input/js0
     # 실 스틱 드리프트를 막기 위해 데드존을 조금 키운다.
     deadzone: 0.05
     # 버튼을 누르고 있는 동안 /joy를 20Hz로 계속 발행한다.
