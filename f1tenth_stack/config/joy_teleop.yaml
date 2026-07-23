@@ -2,46 +2,51 @@ joy:
   ros__parameters:
     # device_name: /dev/input/joypad-f710
     device_id: 0
-    deadzone: 0.01
+    # 실 스틱 드리프트를 막기 위해 데드존을 조금 키운다.
+    deadzone: 0.05
+    # 버튼을 누르고 있는 동안 /joy를 20Hz로 계속 발행한다.
+    # -> 아래 autonomous_deadman의 하트비트(락 해제) 유지에 필요하다.
     autorepeat_rate: 20.0
     coalesce_interval: 0.01
 
+# F710(뒤 스위치 X = XInput) + xpad 드라이버 기준 매핑.
+# xpad 축: 0=LX  1=LY  2=LT  3=RX  4=RY  5=RT  6=DpadX  7=DpadY
+# xpad 버튼: 0=A 1=B 2=X 3=Y 4=LB 5=RB 6=Back 7=Start ...
 joy_teleop:
   ros__parameters:
-    default:
-      type: topic
-      interface_type: ackermann_msgs/msg/AckermannDriveStamped
-      topic_name: teleop
-      axis_mappings:
-        drive-speed:
-          axis: 1
-          scale: 0.0
-          offset: 0.0
-        drive-steering_angle:
-          axis: 2
-          scale: 0.0
-          offset: 0.0
-
+    # ── 수동 주행 (Deadman: LB=버튼4 를 누른 동안만) ─────────────
+    # 왼쪽 스틱 상하 = 속도, 오른쪽 스틱 좌우 = 조향.
+    # (기존 config는 조향이 axis 2 = LT 트리거에 걸려 있어 xpad에서는
+    #  트리거를 안 눌러도 조향이 상시 한쪽으로 꺾이는 버그가 있었다.)
     human_control:
       type: topic
       interface_type: ackermann_msgs/msg/AckermannDriveStamped
       topic_name: teleop
-      deadman_buttons: [4]
+      deadman_buttons: [4]        # LB — 누른 동안만 수동 주행
       axis_mappings:
         drive-speed:
-          axis: 1
-          scale: 5.0
+          axis: 1                 # 왼쪽 스틱 상하 (위 = 전진)
+          scale: 2.0              # m/s — 실차 초기값(보수적). 익숙해지면 상향
           offset: 0.0
         drive-steering_angle:
-          axis: 2
-          scale: 0.34
+          axis: 3                 # 오른쪽 스틱 좌우 (xpad RX)
+          scale: 0.34             # rad — 좌로 밀면 +(좌회전). 반대면 부호 뒤집기
           offset: 0.0
 
-    autonomous_control:
+    # ── 자율주행 Deadman (RB=버튼5 를 누른 동안만 navigation 락 해제) ─
+    # 누르는 동안 Bool(false)를 20Hz로 계속 발행 → mux의 락이 풀려 /drive 통과.
+    # 놓으면 발행이 끊겨 타임아웃 → 락 걸림 → navigation 차단(정지).
+    # 아무것도 안 누르면 기본값이 '락(정지)'이라 부팅 즉시 폭주하지 않는다.
+    #
+    # !! message_value 대신 axis_mappings + value 를 쓴 이유:
+    #    joy_teleop는 message_value 명령을 디바운스해 버튼 0->1 순간에 딱
+    #    한 번만 발행한다(joy_teleop.py). 그러면 눌러도 곧 타임아웃되어 정지.
+    #    axis_mappings 명령은 누르는 동안 매 프레임 발행하므로 하트비트가 된다.
+    autonomous_deadman:
       type: topic
-      interface_type: std_msgs/msg/Int8
-      topic_name: /dev/null
-      deadman_buttons: [5]
-      message_value:
-        data:
-          value: 0
+      interface_type: std_msgs/msg/Bool
+      topic_name: autonomous_unlock
+      deadman_buttons: [5]        # RB — 누른 동안만 자율주행 허용
+      axis_mappings:
+        data:                     # std_msgs/Bool 의 data 필드
+          value: false            # false = 락 해제(주행 허용). 20Hz로 반복 발행

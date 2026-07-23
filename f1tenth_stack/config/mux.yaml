@@ -2,10 +2,21 @@ ackermann_mux:
   ros__parameters:
     topics:
       navigation:
-        topic   : drive
+        topic   : drive         # wall/gap follow 등 자율주행 명령
         timeout : 0.2
         priority: 10
       joystick:
-        topic   : teleop
+        topic   : teleop        # 수동 조종(LB) — 최우선
         timeout : 0.2
         priority: 100
+    # 자율주행 Deadman 락.
+    # isLocked = (타임아웃) OR (Bool==true).
+    # joy_teleop가 RB를 누른 동안만 Bool(false)를 20Hz로 발행 → 락 해제.
+    # 놓으면 타임아웃(0.25s) → 락 걸림 → priority<90 인 navigation(10) 차단(정지).
+    # joystick(100)은 90보다 높아 락에 막히지 않으므로 수동 조종은 항상 가능.
+    # 아무 발행도 없는 기본 상태 = 타임아웃 = 락 = 정지 (안전 기본값).
+    locks:
+      autonomous_deadman:
+        topic   : autonomous_unlock
+        timeout : 0.25
+        priority: 90
