@@ -7,7 +7,7 @@ Drivers onboard f1tenth race cars, targeting ROS 2 Humble with the SOSLAB GL-3 L
 ```bash
 cd ~/f1tenth_ws/src
 cd ~/f1tenth_ws
-git submodule update --init --recursive
+sudo apt install ros-humble-joy #TODO: CHECK THE EXACT PACKAGE NAME
 colcon build --symlink-install
 source install/setup.bash
 ```
@@ -26,6 +26,7 @@ sudo ip addr add 10.110.1.3/24 dev <wired-interface>
 nmcli con mod "<connection-name>" ipv4.addresses 10.110.1.3/24 ipv4.method manual
 nmcli con up "<connection-name>"
 ```
+normally, connection name between jetson orin nano using ethernet is eno1 or eno0.
 
 Do not assign `10.110.1.2` to the PC — pinging the LiDAR will appear to work (you are pinging yourself) but no scan data will arrive.
 
@@ -61,15 +62,6 @@ On Logitech F-710 joysticks, the LB button is the deadman's switch for teleop, a
 - `/sensors/imu/raw`: Topic for `Imu` messages.
 - `/sensors/core`: Topic for telemetry data from the VESC
 
-## External Dependencies
-
-1. ackermann_msgs [https://index.ros.org/r/ackermann_msgs/#humble](https://index.ros.org/r/ackermann_msgs/#humble).
-2. gl_ros_driver_udp [https://github.com/PARKasd/gl_ros_driver_udp_humble](https://github.com/PARKasd/gl_ros_driver_udp_humble). This is the driver for the SOSLAB GL-3 LiDAR (ROS 2 Humble, UDP, included as a submodule).
-3. joy [https://index.ros.org/p/joy/#humble](https://index.ros.org/p/joy/#humble). This is the driver for joysticks in ROS 2.
-4. teleop_tools  [https://index.ros.org/p/teleop_tools/#humble](https://index.ros.org/p/teleop_tools/#humble). This is the package for teleop with joysticks in ROS 2 (humble-devel branch of the f1tenth fork, included as a submodule).
-5. vesc [GitHub - f1tenth/vesc at humble](https://github.com/f1tenth/vesc/tree/humble). This is the driver for VESCs in ROS 2 (humble branch, included as a submodule).
-6. ackermann_mux [GitHub - f1tenth/ackermann_mux: Twist multiplexer](https://github.com/f1tenth/ackermann_mux). This is a package for multiplexing ackermann messages in ROS 2.
-<!-- 7. rosbridge_suite [https://index.ros.org/p/rosbridge_suite/#foxy-overview](https://index.ros.org/p/rosbridge_suite/#foxy-overview) This is a package that allows for websocket connection in ROS 2. -->
 
 ## Package in this repo
 
