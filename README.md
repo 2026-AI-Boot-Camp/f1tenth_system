@@ -12,7 +12,11 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
+## Launch
 
+```bash
+ros2 launch f1tenth_stack bringup_launch.py
+```
 
 ## GL-3 LiDAR setup
 
